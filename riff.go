@@ -1,11 +1,9 @@
 package main
 
 /*
-#cgo CFLAGS: -Iheaders
+#cgo CFLAGS: -I./headers
 #cgo LDFLAGS: ./headers/libs/x86_64/libbass.so
-#include <./headers/bass.h>
-
-
+#include "headers/bass.h"
 */
 import "C"
 import (
@@ -13,7 +11,7 @@ import (
 )
 
 func main() {
-	var czy C.BOOL = C.BASS_Init(-1, 48000, C.BASS_DEVICE_STEREO, C.NULL, C.NULL)
+	var czy C.BOOL = C.BASS_Init(-1, 48000, C.BASS_DEVICE_STEREO, nil, nil)
 	if czy == 0 {
 		fmt.Println("Initialization failed")
 	} else {
@@ -21,21 +19,22 @@ func main() {
 	}
 	defer C.BASS_Free()
 
-	tytul := `muza/beyond.mod`
+	tytul := *C.CString("muza/beyond.mod")
+	//defer C.free(unsafe.Pointer(tytul)) // No need for C.free here
 
-	play := C.BASS_MusicLoad(
+	var play *C.HMUSIC = C.BASS_MusicLoad(
 		C.FALSE,
-		&C.cgo(tytul),
+		tytul,
 		0,
 		0,
 		0,
 		0,
 	)
 
-	//play = play
 	if play == nil {
 		fmt.Println("Music load failed")
 	} else {
 		fmt.Println("Music load succeeded")
 	}
+
 }
